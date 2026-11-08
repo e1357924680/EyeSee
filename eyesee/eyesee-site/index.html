@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EyeSee (ES)</title>
+<meta name="description" content="Instant on-device translation for manga, images and text.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500&family=Reem+Kufi:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#EEF2F7;--surface:#fff;--ink:#1F2A44;--muted:#56617D;--brand:#2B3A8F;--on-brand:#fff;--mark:#FFD23F;--line:#CBD3E1;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--paper:#151B2E;--surface:#1D2540;--ink:#E8ECF6;--muted:#9AA6C4;--brand:#8FA2FF;--on-brand:#151B2E;--line:#2C3656;color-scheme:dark}}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 1.0625rem/1.7 "IBM Plex Sans Arabic","Segoe UI",Tahoma,system-ui,sans-serif;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
+h1,h2,.brand{font-family:"Reem Kufi","IBM Plex Sans Arabic","Segoe UI",system-ui,sans-serif;font-weight:700;line-height:1.15;margin:0}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+a{color:var(--brand)}
+:focus-visible{outline:3px solid var(--mark);outline-offset:2px}
+button,input{font:inherit;color:inherit}
+
+header .wrap{display:flex;align-items:center;gap:12px;padding-top:16px;padding-bottom:16px}
+.brand{font-size:1.5rem;margin-inline-end:auto;letter-spacing:.01em}
+.brand i{font-style:normal;color:var(--brand)}
+.btn{border:1.5px solid var(--ink);background:transparent;border-radius:999px;padding:.45rem 1.1rem;cursor:pointer;font-weight:500}
+.btn.solid{background:var(--brand);border-color:var(--brand);color:var(--on-brand)}
+.btn:hover{background:var(--ink);color:var(--paper)}
+.btn.solid:hover{filter:brightness(1.1);background:var(--brand);color:var(--on-brand)}
+.link{border:0;background:none;cursor:pointer;color:var(--muted);padding:.45rem .5rem;text-decoration:underline}
+#who{color:var(--muted);font-size:.95rem}
+
+.hero{display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:center;padding:48px 0 64px}
+h1{font-size:clamp(2.2rem,5.2vw,3.6rem)}
+.lead{color:var(--muted);max-width:34em;margin:16px 0 28px}
+.search{display:flex;gap:0;background:var(--surface);border:2px solid var(--ink);border-radius:14px;overflow:hidden;max-width:620px}
+.search input{flex:1;min-width:0;border:0;background:transparent;padding:.95rem 1.1rem;outline:none}
+.search:focus-within{outline:3px solid var(--mark);outline-offset:2px}
+.search button{border:0;border-inline-start:2px solid var(--ink);background:var(--brand);color:var(--on-brand);padding:0 1.3rem;cursor:pointer;font-weight:500}
+.search button:hover{filter:brightness(1.12)}
+#hint{min-height:1.7em;margin:10px 0 0;color:var(--muted);font-size:.95rem}
+
+/* demo panel: a manga frame whose bubble flips to the translation */
+.panel{position:relative;display:block;width:100%;max-width:420px;aspect-ratio:4/5;margin-inline:auto;border:5px solid var(--ink);border-radius:6px;padding:0;cursor:pointer;overflow:hidden;
+ background:radial-gradient(circle,rgba(31,42,68,.45) 1.1px,transparent 1.6px) 0 0/9px 9px,
+ repeating-conic-gradient(from 0deg at 50% 62%,#fff 0 4deg,#dfe5f1 4deg 8deg)}
+.panel::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent 40%,rgba(255,210,63,.55) 50%,transparent 60%);transform:translateX(-120%);pointer-events:none}
+.panel.scan::after{animation:sweep 1.1s ease-in-out forwards}
+@keyframes sweep{to{transform:translateX(120%)}}
+.bubble{position:absolute;top:9%;inset-inline-start:14%;width:46%;height:46%;background:#fff;border:3px solid #1F2A44;border-radius:50%/42%;display:grid;place-items:center;color:#1F2A44}
+.bubble::after{content:"";position:absolute;bottom:-26px;inset-inline-start:30%;border:14px solid transparent;border-top:26px solid #1F2A44;border-bottom:0}
+.orig{writing-mode:vertical-rl;font:700 2rem/1.3 "Noto Sans JP","Yu Gothic","Hiragino Sans",system-ui,sans-serif;letter-spacing:.12em;transition:opacity .25s}
+.tr{position:absolute;inset:14% 8%;display:grid;place-items:center;text-align:center;background:#fff;border:3px solid var(--mark);border-radius:12px;font:700 1.35rem/1.2 "Reem Kufi","IBM Plex Sans Arabic",system-ui,sans-serif;opacity:0;transition:opacity .25s}
+.panel.on .tr{opacity:1}.panel.on .orig{opacity:0}
+.cap{text-align:center;color:var(--muted);font-size:.9rem;margin:12px 0 0}
+
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:2px solid var(--ink);padding:0;margin:0;list-style:none}
+.facts li{padding:24px 24px 28px;border-inline-start:1px solid var(--line)}
+.facts li:first-child{border-inline-start:0;padding-inline-start:0}
+.facts h2{font-size:1.3rem;margin-bottom:8px}
+.facts p{margin:0;color:var(--muted)}
+
+.price{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:20px;margin:56px 0;padding:28px 32px;background:var(--surface);border:2px solid var(--ink);border-radius:14px}
+.price h2{font-size:1.6rem}
+.price p{margin:4px 0 0;color:var(--muted)}
+footer{padding:24px 0 40px;color:var(--muted);font-size:.9rem;border-top:1px solid var(--line)}
+
+dialog{border:2px solid var(--ink);border-radius:14px;background:var(--surface);color:var(--ink);padding:26px;width:min(92vw,380px)}
+dialog::backdrop{background:rgba(10,14,28,.55)}
+dialog h2{font-size:1.5rem;margin-bottom:16px}
+label{display:block;font-size:.95rem;margin:12px 0 4px}
+dialog input{width:100%;padding:.7rem .8rem;border:1.5px solid var(--line);border-radius:8px;background:var(--paper)}
+dialog .btn{width:100%;margin-top:18px}
+#err{color:#B3261E;min-height:1.5em;margin:8px 0 0;font-size:.9rem}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]) #err{color:#FF8A80}}
+.row{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
+
+@media (max-width:860px){
+ .hero{grid-template-columns:1fr;gap:32px;padding-top:24px}
+ .facts{grid-template-columns:1fr}.facts li{border-inline-start:0;border-top:1px solid var(--line);padding-inline-start:0}.facts li:first-child{border-top:0}
+ .search{flex-direction:column}.search button{border-inline-start:0;border-top:2px solid var(--ink);padding:.8rem}
+}
+@media (prefers-reduced-motion:reduce){.panel.scan::after{animation:none}.orig,.tr{transition:none}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="brand">Eye<i>See</i></div>
+  <span id="who" hidden></span>
+  <button class="link" id="lang" type="button" aria-label="Language">EN</button>
+  <button class="btn" id="login" type="button" data-i18n="login"></button>
+  <button class="btn solid" id="signup" type="button" data-i18n="signup"></button>
+  <button class="link" id="logout" type="button" hidden data-i18n="logout"></button>
+</div></header>
+
+<main class="wrap">
+  <section class="hero">
+    <div>
+      <h1 data-i18n="h1"></h1>
+      <p class="lead" data-i18n="lead"></p>
+      <form class="search" id="go" role="search">
+        <input id="q" type="text" inputmode="url" autocomplete="off" spellcheck="false" data-i18n-ph="ph" aria-label="URL or search">
+        <button type="submit" data-i18n="open"></button>
+      </form>
+      <p id="hint" role="status"></p>
+    </div>
+    <div>
+      <button class="panel" id="demo" type="button" aria-pressed="false" data-i18n-al="demoAl">
+        <span class="bubble"><span class="orig" lang="ja">また明日ね</span><span class="tr" id="trText"></span></span>
+      </button>
+      <p class="cap" data-i18n="cap"></p>
+    </div>
+  </section>
+
+  <ul class="facts">
+    <li><h2 data-i18n="f1h"></h2><p data-i18n="f1p"></p></li>
+    <li><h2 data-i18n="f2h"></h2><p data-i18n="f2p"></p></li>
+    <li><h2 data-i18n="f3h"></h2><p data-i18n="f3p"></p></li>
+  </ul>
+
+  <section class="price">
+    <div><h2 data-i18n="ph2"></h2><p data-i18n="pp"></p></div>
+    <button class="btn solid" id="trial" type="button" data-i18n="trial"></button>
+  </section>
+</main>
+
+<footer><div class="wrap">© EyeSee (ES) <span id="extlink"></span></div></footer>
+
+<dialog id="auth">
+  <form id="authForm">
+    <h2 id="authTitle"></h2>
+    <label for="em" data-i18n="email"></label>
+    <input id="em" type="email" required autocomplete="email">
+    <label for="pw" data-i18n="pass"></label>
+    <input id="pw" type="password" required minlength="8" autocomplete="current-password">
+    <p id="err" role="alert"></p>
+    <button class="btn solid" type="submit" id="authSubmit"></button>
+    <div class="row">
+      <button class="link" type="button" id="switch"></button>
+      <button class="link" type="button" id="close" data-i18n="close"></button>
+    </div>
+  </form>
+</dialog>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+/* ===== Config (team: edit these) ===== */
+const CONFIG = {
+  SUPABASE_URL: '',          // https://YOUR-PROJECT.supabase.co
+  SUPABASE_ANON_KEY: '',     // Supabase public anon key (safe in the browser)
+  API_BASE: '',              // https://eyesee-api.YOUR-SUBDOMAIN.workers.dev  (eyesee-api Worker)
+  SEARCH_URL: 'https://www.google.com/search?q=',   // used when the input is keywords, not a URL
+  EXTENSION_URL: '#'         // Chrome Web Store link once published
+};
+
+/* ===== i18n ===== */
+const T = {
+ ar:{login:'تسجيل الدخول',signup:'إنشاء حساب',logout:'خروج',h1:'مرحباً بك في EyeSee (ES)',
+  lead:'ترجمة فورية للمانجا والصور والنصوص، تظهر فوق الصفحة الأصلية في مكانها تماماً.',
+  ph:'الصق رابط صفحة مانجا أو اكتب ما تبحث عنه',open:'افتح مترجَماً',
+  cap:'اضغط على الفقاعة لتبديل الأصل والترجمة',demoAl:'مثال: فقاعة مانجا يابانية وترجمتها',demoTr:'نراك غداً',
+  f1h:'الترجمة فوق الصورة نفسها',f1p:'يقرأ النص من الصورة ويضع الترجمة في موضعه، دون نسخ ولصق.',
+  f2h:'تعمل على جهازك',f2p:'القراءة والترجمة تجريان داخل المتصفح، فلا تُرسَل صفحاتك إلى خادم.',
+  f3h:'اختر لغتك',f3p:'ترجم إلى أي من 16 لغة. اللغات المقروءة حالياً: الإنجليزية واليابانية، أفقياً وعمودياً.',
+  ph2:'يومان مجاناً، ثم 5$ شهرياً',pp:'بدون التزام. تلغي اشتراكك في أي وقت.',trial:'ابدأ التجربة المجانية',
+  email:'البريد الإلكتروني',pass:'كلمة المرور',close:'إغلاق',
+  loginT:'تسجيل الدخول',signT:'إنشاء حساب',loginS:'ادخل',signS:'ابدأ التجربة',toSign:'ليس لديك حساب؟ أنشئ حساباً',toLogin:'لديك حساب؟ سجّل الدخول',
+  hi:'مرحباً، ',noext:'ثبّت إضافة EyeSee لتُترجَم الصفحة تلقائياً. فتحنا الصفحة الأصلية في تبويب جديد.',
+  opened:'فُتحت الصفحة في تبويب جديد وجارٍ ترجمتها.',noconn:'الحساب غير متاح بعد: لم يُربط الخادم.',bad:'اكتب رابطاً أو كلمات للبحث.',get:'ثبّت الإضافة',subscribe:'اشترك بـ 5$ شهرياً',paid:'اشتراك مدفوع',trialLeft:'تجربة: متبقي {h} ساعة',expired:'انتهت التجربة',confirm:'أرسلنا رابط تأكيد إلى بريدك. أكّد الحساب ثم سجّل الدخول.',confirmFirst:'أكّد بريدك أولاً',processing:'تم الدفع. جارٍ تفعيل اشتراكك…'},
+ en:{login:'Log in',signup:'Sign up',logout:'Log out',h1:'Welcome to EyeSee (ES)',
+  lead:'Instant translation for manga, images and text, drawn right over the original page.',
+  ph:'Paste a manga page link or type what to find',open:'Open translated',
+  cap:'Click the bubble to flip between original and translation',demoAl:'Example: a Japanese manga bubble and its translation',demoTr:'See you tomorrow',
+  f1h:'Translation on the image itself',f1p:'Reads the text in the image and places the translation where it sits. No copy and paste.',
+  f2h:'Runs on your device',f2p:'Reading and translating happen in your browser, so your pages never go to a server.',
+  f3h:'Pick your language',f3p:'Translate into any of 16 languages. Currently read: English and Japanese, horizontal and vertical.',
+  ph2:'2 days free, then $5 a month',pp:'No commitment. Cancel any time.',trial:'Start free trial',
+  email:'Email',pass:'Password',close:'Close',
+  loginT:'Log in',signT:'Create account',loginS:'Log in',signS:'Start trial',toSign:'No account? Sign up',toLogin:'Have an account? Log in',
+  hi:'Hi, ',noext:'Install the EyeSee extension to translate pages automatically. We opened the original page in a new tab.',
+  opened:'Opened in a new tab and translating.',noconn:'Accounts are not available yet: the backend is not connected.',bad:'Enter a link or search words.',get:'Install the extension',subscribe:'Subscribe for $5/month',paid:'Subscribed',trialLeft:'Trial: {h}h left',expired:'Trial ended',confirm:'We sent a confirmation link to your email. Confirm, then log in.',confirmFirst:'Confirm your email first',processing:'Payment received. Activating your subscription…'}
+};
+let lang='ar', mode='login', user=null;
+const $=id=>document.getElementById(id);
+const t=k=>T[lang][k];
+
+function render(){
+  document.documentElement.lang=lang; document.documentElement.dir=lang==='ar'?'rtl':'ltr';
+  document.querySelectorAll('[data-i18n]').forEach(e=>e.textContent=t(e.dataset.i18n));
+  document.querySelectorAll('[data-i18n-ph]').forEach(e=>e.placeholder=t(e.dataset.i18nPh));
+  document.querySelectorAll('[data-i18n-al]').forEach(e=>e.setAttribute('aria-label',t(e.dataset.i18nAl)));
+  $('trText').textContent=t('demoTr'); $('lang').textContent=lang==='ar'?'EN':'العربية';
+  $('extlink').innerHTML=CONFIG.EXTENSION_URL!=='#'?` · <a href="${CONFIG.EXTENSION_URL}">${t('get')}</a>`:'';
+  authLabels(); session();
+}
+function authLabels(){
+  $('authTitle').textContent=t(mode==='login'?'loginT':'signT');
+  $('authSubmit').textContent=t(mode==='login'?'loginS':'signS');
+  $('switch').textContent=t(mode==='login'?'toSign':'toLogin');
+  $('pw').autocomplete=mode==='login'?'current-password':'new-password';
+}
+function licStatus(){
+  if(!lic) return '';
+  if(lic.plan==='paid') return t('paid');
+  if(lic.plan==='unconfirmed') return t('confirmFirst');
+  return lic.plan==='trial'&&lic.ok ? t('trialLeft').replace('{h}',Math.ceil(lic.msLeft/3600000)) : t('expired');
+}
+function session(){
+  const on=!!user;
+  $('who').hidden=!on; $('logout').hidden=!on; $('login').hidden=on; $('signup').hidden=on;
+  if(on){const st=licStatus(); $('who').textContent=t('hi')+user.email+(st?' ('+st+')':'')}
+  $('trial').textContent=t(on?'subscribe':'trial');
+  document.querySelector('.price').hidden=!!(lic&&lic.plan==='paid');
+}
+$('lang').onclick=()=>{lang=lang==='ar'?'en':'ar';render()};
+
+/* ===== Demo bubble ===== */
+const demo=$('demo');
+demo.onclick=()=>{const on=demo.classList.toggle('on');demo.setAttribute('aria-pressed',on)};
+if(!matchMedia('(prefers-reduced-motion:reduce)').matches){
+  setTimeout(()=>{demo.classList.add('scan');setTimeout(()=>demo.click(),450)},900);   // single load-time reveal
+} else demo.classList.add('on');
+
+/* ===== Smart search / URL bar ===== */
+function resolve(q){
+  q=q.trim(); if(!q) return null;
+  if(/^https?:\/\//i.test(q)){try{return{url:new URL(q).href,scan:true}}catch(e){return null}}
+  if(!/\s/.test(q)&&/^[\w-]+(\.[\w-]+)+(\/\S*)?$/.test(q)) return{url:'https://'+q,scan:true};
+  return{url:CONFIG.SEARCH_URL+encodeURIComponent(q),scan:false};
+}
+// The extension's content script (running on this site) answers with an ACK; if none arrives it is not installed.
+function viaExtension(msg){
+  return new Promise(res=>{
+    const to=setTimeout(()=>{off();res(false)},700);
+    function on(e){if(e.source===window&&e.data&&e.data.source==='eyesee-ext'&&e.data.type==='ES_ACK'){clearTimeout(to);off();res(true)}}
+    function off(){removeEventListener('message',on)}
+    addEventListener('message',on);
+    postMessage(Object.assign({source:'eyesee-site'},msg),'*');
+  });
+}
+$('go').onsubmit=async e=>{
+  e.preventDefault();
+  const r=resolve($('q').value);
+  if(!r){$('hint').textContent=t('bad');return}
+  $('hint').textContent='…';
+  if(await viaExtension({type:'ES_OPEN_URL',url:r.url,scan:r.scan})) $('hint').textContent=t('opened');
+  else{window.open(r.url,'_blank','noopener');$('hint').textContent=t('noext')}
+};
+
+/* ===== Auth (Supabase) + licence (EyeSee API Worker) ===== */
+const dlg=$('auth');
+let sb=null, accessToken=null, lic=null, extToken=null;
+try{ if(CONFIG.SUPABASE_URL&&CONFIG.SUPABASE_ANON_KEY&&window.supabase) sb=window.supabase.createClient(CONFIG.SUPABASE_URL,CONFIG.SUPABASE_ANON_KEY) }catch(e){}
+async function api(path,method){
+  const r=await fetch(CONFIG.API_BASE+path,{method:method||'POST',headers:{Authorization:'Bearer '+accessToken}});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok) throw Object.assign(new Error(j.error||'http'),{code:j.error});
+  return j;
+}
+const toExt=tok=>postMessage({source:'eyesee-site',type:'ES_SET_TOKEN',token:tok},'*');
+async function syncLicense(){
+  try{const j=await api('/ext-token'); lic=j.license; extToken=j.token; toExt(extToken)}
+  catch(e){lic=e.code==='email_not_confirmed'?{plan:'unconfirmed'}:null}
+  session();
+}
+if(sb) sb.auth.onAuthStateChange((_ev,sess)=>{
+  user=sess?sess.user:null; accessToken=sess?sess.access_token:null; lic=null; session();
+  if(sess){ syncLicense(); if(/[?&]paid=1/.test(location.search)){$('hint').textContent=t('processing');[3000,8000,15000].forEach(ms=>setTimeout(syncLicense,ms))} }
+  else{extToken=null; toExt(null)}
+});
+// If the extension loads after the page, it announces itself and we re-send the token.
+addEventListener('message',e=>{if(e.source===window&&e.data&&e.data.source==='eyesee-ext'&&e.data.type==='ES_READY'&&extToken) toExt(extToken)});
+
+function openAuth(m){mode=m;authLabels();$('err').textContent='';dlg.showModal();$('em').focus()}
+$('login').onclick=()=>openAuth('login');
+$('signup').onclick=()=>openAuth('signup');
+$('switch').onclick=()=>{mode=mode==='login'?'signup':'login';authLabels()};
+$('close').onclick=()=>dlg.close();
+$('logout').onclick=()=>{if(sb) sb.auth.signOut()};
+$('trial').onclick=async()=>{
+  if(!user) return openAuth('signup');
+  try{const j=await api('/checkout'); location.href=j.url}
+  catch(e){$('hint').textContent=e.code==='already_subscribed'?t('paid'):t('noconn')}
+};
+$('authForm').onsubmit=async e=>{
+  e.preventDefault();
+  if(!sb){$('err').textContent=t('noconn');return}
+  const email=$('em').value, password=$('pw').value;
+  try{
+    if(mode==='signup'){
+      const {data,error}=await sb.auth.signUp({email,password,options:{emailRedirectTo:location.origin+location.pathname}});
+      if(error) throw error;
+      if(!data.session){$('err').textContent=t('confirm');return}
+    }else{
+      const {error}=await sb.auth.signInWithPassword({email,password});
+      if(error) throw error;
+    }
+    $('pw').value=''; dlg.close();
+  }catch(err){$('err').textContent=err.message||t('noconn')}
+};
+render();
+</script>
+</body>
+</html>
