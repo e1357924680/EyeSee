@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<style>
+  body { width: 280px; margin: 0; padding: 14px; font: 14px "Segoe UI", Tahoma, system-ui, sans-serif; }
+  h1 { font-size: 16px; margin: 0 0 10px; }
+  label { display: block; margin: 8px 0 4px; color: #444; }
+  select, button { width: 100%; padding: 7px; font: inherit; box-sizing: border-box; }
+  button { margin-top: 8px; cursor: pointer; }
+  button.primary { background: #1a73e8; color: #fff; border: 0; border-radius: 6px; }
+  .row { display: flex; align-items: center; gap: 6px; margin-top: 10px; }
+  .row input { width: auto; }
+  #status, #plan { margin-top: 8px; font-size: 12px; color: #555; white-space: pre-line; }
+</style>
+</head>
+<body>
+  <h1>EyeSee</h1>
+  <label for="target">ترجم إلى / Translate to</label>
+  <select id="target">
+    <option value="ar">العربية</option>
+    <option value="he">עברית (Hebrew)</option>
+    <option value="en">English</option>
+    <option value="zh">中文 (简体)</option>
+    <option value="zh-Hant">中文 (繁體)</option>
+    <option value="es">Español</option>
+    <option value="fr">Français</option>
+    <option value="de">Deutsch</option>
+    <option value="ru">Русский</option>
+    <option value="tr">Türkçe</option>
+    <option value="hi">हिन्दी</option>
+    <option value="pt">Português</option>
+    <option value="it">Italiano</option>
+    <option value="id">Bahasa Indonesia</option>
+    <option value="ko">한국어</option>
+    <option value="ja">日本語</option>
+  </select>
+  <label for="src">لغة المصدر / Source</label>
+  <select id="src">
+    <option value="auto">تلقائي (إنجليزي + ياباني)</option>
+    <option value="en">إنجليزي</option>
+    <option value="ja">ياباني (أفقي)</option>
+    <option value="ja-manga">ياباني — مانجا (عمودي)</option>
+    <option value="ko">كوري</option>
+    <option value="zh">صيني (مبسط)</option>
+    <option value="zh-Hant">صيني (تقليدي)</option>
+  </select>
+  <div class="row"><input type="checkbox" id="auto"><label for="auto" style="margin:0">ترجمة تلقائية أثناء التمرير</label></div>
+  <button class="primary" id="openViewer">فتح متصفح EyeSee</button>
+  <button id="scan">ترجمة الصفحة (Alt+T)</button>
+  <button id="clear">إزالة الترجمة</button>
+  <button id="prep">تجهيز حزم اللغة (مرة واحدة)</button>
+  <div id="status"></div>
+  <div id="plan"></div>
+  <script src="config.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

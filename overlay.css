@@ -1,0 +1,32 @@
+.eyesee-overlay {
+  position: absolute;
+  z-index: 2147483646;
+  background: #fff;
+  color: #111;
+  font-family: "Segoe UI", Tahoma, "Noto Naskh Arabic", system-ui, sans-serif;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+  padding: 2px 4px;
+  box-sizing: border-box;
+  border-radius: 6px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  word-break: break-word;
+  pointer-events: auto;
+}
+.eyesee-untranslated { background: rgba(255, 244, 200, 0.95); color: #555; font-weight: 400; }
+.eyesee-toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 2147483647;
+  background: #222;
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font: 14px system-ui, sans-serif;
+  direction: rtl;
+}
